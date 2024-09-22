@@ -1,39 +1,32 @@
 package com.nguyen.dsa.linked_list
 
-class LinkedListIterator<T>(
-    private val list: LinkedList<T>
-) : Iterator<T>{
-    private var index: Int = 0
-    private var lastNode: Node<T>? = null
-
-    override fun hasNext(): Boolean {
-        return index < list.size
-    }
-
-    override fun next(): T {
-        if(index >= list.size) throw IndexOutOfBoundsException()
-
-        lastNode = if(index == 0){
-            list.nodeAt(0)
-        } else {
-            lastNode?.next
-        }
-
-        index ++
-
-        return lastNode!!.value
-    }
-
-}
-
-
-class LinkedList<T> : Iterable<T>{
+class LinkedList<T> : Iterable<T>,
+    Collection<T>, MutableIterable<T>,
+    MutableCollection<T> {
     private var head: Node<T>? = null
     private var tail: Node<T>? = null
-    var size = 0
 
-    fun isEmpty(): Boolean {
-        return size == 0
+    override var size = 0
+
+    override fun contains(element: T): Boolean {
+        for (item in this) {
+            if (item == element) {
+                return true
+            }
+        }
+        return false
+    }
+
+    override fun containsAll(elements: Collection<T>): Boolean {
+        for (searched in elements) {
+            if (!contains(searched)) return false
+        }
+
+        return true
+    }
+
+    override fun isEmpty(): Boolean {
+        return isEmpty()
     }
 
     override fun toString(): String {
@@ -134,37 +127,63 @@ class LinkedList<T> : Iterable<T>{
         return next?.value
     }
 
-    override fun iterator(): Iterator<T> {
-        TODO("Not yet implemented")
+    override fun add(element: T): Boolean {
+       append(element)
+        return true
     }
-}
 
+    override fun addAll(elements: Collection<T>): Boolean {
+        for(element in elements){
+            append(element)
+        }
+        return true
+    }
 
+    override fun clear() {
+        head = null
+        tail = null
+        size = 0
+    }
 
-fun main() {
-    val list = LinkedList<Int>()
-    list.push(1).push(2).push(3)
-    println(list)
+    override fun iterator(): MutableIterator<T> {
+        return LinkedListIterator(this)
+    }
 
+    override fun remove(element: T): Boolean {
+        val iterator = iterator()
 
-    println("remove last")
-//    val list2 = LinkedList<Int>()
-//    list2.push(1).push(2).push(3)
-//    println('bef')
+        while(iterator.hasNext()){
+            val item = iterator.next()
+            if(item == element){
+                iterator.remove()
+                return true
+            }
+        }
 
+        return false
+    }
 
-    "removing a node after a particular node"
-    val list2 =
-        LinkedList<Int>()
-    list2.push(3)
-    list2.push(2)
-    list2.push(1)
-    println("Before removing at particular index: $list2")
-    val index = 2
-    val node = list2.nodeAt(index - 1)!!
-    val removedValue =
-        list2.removeAfter(node)
-    println("After removing at index $index: $list2")
-    println("Removed value: $removedValue")
+    override fun removeAll(elements: Collection<T>): Boolean {
+        var result = false
 
+        for(item in elements){
+            result = remove(item) || result
+        }
+
+        return result
+    }
+
+    override fun retainAll(elements: Collection<T>): Boolean {
+        var result = false
+        val iterator = this.iterator()
+        while(iterator.hasNext()){
+            val item = iterator.next()
+            if(!elements.contains(item)){
+                iterator.remove()
+            }
+            result = true
+        }
+
+        return result
+    }
 }
